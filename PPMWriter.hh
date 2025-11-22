@@ -146,16 +146,30 @@ inline void PPMWriter::init_PPMImage() {
 }
 
 // Calculate the image width and height
+//inline void PPMWriter::calculate_image_size() {
+//    // Width is <30 px padding> TEXT <30 px padding>
+//    m_image_width = m_data.max_line_len * MFont::CHAR_IMAGE_WIDTH + (padding*2);
+//    // Height is how many rows we read from the file + padding up and down
+//    m_image_height = m_data.rows * MFont::CHAR_IMAGE_HEIGHT + (padding*2);
+//    // We create the header aswell I guess?
+//    m_header = "P6\n"
+//        + std::to_string(m_image_width) + " "
+//        + std::to_string(m_image_height)+ "\n255\n";
+//}
+
 inline void PPMWriter::calculate_image_size() {
-    // Width is <30 px padding> TEXT <30 px padding>
-    m_image_width = m_data.max_line_len * MFont::CHAR_IMAGE_WIDTH + (padding*2);
-    // Height is how many rows we read from the file + padding up and down
-    m_image_height = m_data.rows * MFont::CHAR_IMAGE_HEIGHT + (padding*2);
-    // We create the header aswell I guess?
-    m_header = "P6\n"
-        + std::to_string(m_image_width) + " "
-        + std::to_string(m_image_height)+ "\n255\n";
+    // account for 1px spacing between rows used at render time
+    if (m_data.rows <= 0) {
+        m_image_height = padding * 2;
+    }
+    else {
+        m_image_height = static_cast<int>(m_data.rows) * (MFont::CHAR_IMAGE_HEIGHT + 1)
+            + (padding * 2) - 1; // formula: rows*H + (rows-1)*1 + 2*padding
+    }
+    m_image_width = m_data.max_line_len * MFont::CHAR_IMAGE_WIDTH + (padding * 2);
+    m_header = "P6\n" + std::to_string(m_image_width) + " " + std::to_string(m_image_height) + "\n255\n";
 }
+
 
 // Read the file into PPMString struct
 inline void PPMWriter::read_input_file() {
